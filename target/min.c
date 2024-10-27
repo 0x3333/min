@@ -503,14 +503,15 @@ static void rx_byte(struct min_context *self, uint8_t byte)
         self->rx_control = byte;
         crc32_step(&self->rx_checksum, byte);
         if (self->rx_frame_length > 0) {
+            self->rx_frame_state = RECEIVING_PAYLOAD;
+#if (MAX_PAYLOAD != 255)
             // Can reduce the RAM size by compiling limits to frame sizes
-            if (self->rx_frame_length <= MAX_PAYLOAD) {
-                self->rx_frame_state = RECEIVING_PAYLOAD;
-            } else {
+            if (self->rx_frame_length > MAX_PAYLOAD) {
                 // Frame dropped because it's longer than any frame we can buffer
                 min_debug_print("Dropping frame because length %d > MAX_PAYLOAD %d", self->rx_frame_length, MAX_PAYLOAD);
                 self->rx_frame_state = SEARCHING_FOR_SOF;
             }
+#endif
         } else {
             self->rx_frame_state = RECEIVING_CHECKSUM_3;
         }
