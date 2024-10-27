@@ -54,9 +54,6 @@ enum {
     RESET = 0xfeU,
 };
 
-// Where the payload data of the frame FIFO is stored
-uint8_t payloads_ring_buffer[TRANSPORT_FIFO_MAX_FRAME_DATA];
-
 static uint32_t now;
 static void send_reset(struct min_context *self);
 #endif
@@ -215,7 +212,7 @@ static struct transport_frame *transport_fifo_get(struct min_context *self, uint
 static void transport_fifo_send(struct min_context *self, struct transport_frame *frame)
 {
     min_debug_print("transport_fifo_send: min_id=%d, seq=%d, payload_len=%d\n", frame->min_id, frame->seq, frame->payload_len);
-    on_wire_bytes(self, frame->min_id | (uint8_t)0x80U, frame->seq, payloads_ring_buffer, frame->payload_offset, TRANSPORT_FIFO_SIZE_FRAME_DATA_MASK, frame->payload_len);
+    on_wire_bytes(self, frame->min_id | (uint8_t)0x80U, frame->seq, self->payloads_ring_buffer, frame->payload_offset, TRANSPORT_FIFO_SIZE_FRAME_DATA_MASK, frame->payload_len);
     frame->last_sent_time_ms = now;
 }
 
@@ -286,7 +283,7 @@ bool min_queue_frame(struct min_context *self, uint8_t min_id, uint8_t const *pa
 
         uint16_t payload_offset = frame->payload_offset;
         for (i = 0; i < payload_len; i++) {
-            payloads_ring_buffer[payload_offset] = payload[i];
+            self->payloads_ring_buffer[payload_offset] = payload[i];
             payload_offset++;
             payload_offset &= TRANSPORT_FIFO_SIZE_FRAME_DATA_MASK;
         }

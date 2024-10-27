@@ -142,6 +142,7 @@ struct transport_fifo {
 struct min_context {
 #ifdef TRANSPORT_PROTOCOL
     struct transport_fifo transport_fifo; // T-MIN queue of outgoing frames
+    uint8_t payloads_ring_buffer[TRANSPORT_FIFO_MAX_FRAME_DATA]; // Where the payload data of the frame FIFO is stored
 #endif
     uint8_t rx_frame_payload_buf[MAX_PAYLOAD]; // Payload received so far
     uint32_t rx_frame_checksum;                // Checksum received over the wire
